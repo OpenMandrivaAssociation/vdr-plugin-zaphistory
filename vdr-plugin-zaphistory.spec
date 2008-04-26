@@ -2,7 +2,7 @@
 %define plugin	zaphistory
 %define name	vdr-plugin-%plugin
 %define version	0.9.5
-%define rel	6
+%define rel	7
 
 Summary:	VDR plugin: History of the last zapped channels
 Name:		%name
@@ -12,8 +12,9 @@ Group:		Video
 License:	GPL
 URL:		http://www.unterbrecher.de/vdr/developer.php
 Source:		http://www.unterbrecher.de/vdr/download/vdr-%plugin-%version.tar.bz2
+Patch0:		zaphistory-0.9.5-i18n-1.6.patch
 BuildRoot:	%{_tmppath}/%{name}-buildroot
-BuildRequires:	vdr-devel >= 1.4.1-6
+BuildRequires:	vdr-devel >= 1.6.0
 Requires:	vdr-abi = %vdr_abi
 
 %description
@@ -27,6 +28,8 @@ deleted or reseted from the menu.
 
 %prep
 %setup -q -n %plugin-%version
+%patch0 -p1
+%vdr_plugin_prep
 
 %build
 %vdr_plugin_build
