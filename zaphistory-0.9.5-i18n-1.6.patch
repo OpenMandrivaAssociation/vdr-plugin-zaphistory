@@ -1,0 +1,1461 @@
+
+This is a semi-automatically created i18n adaptation patch and may contain
+errors (such as missing translations). This should only be used as a
+temporary measure until the upstream plugin maintainer fixes the plugin
+properly according to the instructions in i18n-to-gettext.pl.
+
+Created for Mandriva Linux packaging by Anssi Hannula <anssi@mandriva.org>.
+
+
+Index: zaphistory-0.9.5/Makefile
+===================================================================
+--- zaphistory-0.9.5/Makefile
++++ zaphistory-0.9.5/Makefile	2008-04-25 13:03:52.000000000 +0300
+@@ -45,7 +45,7 @@
+ 
+ ### The object files (add further files here):
+ 
+-OBJS = $(PLUGIN).o zaplist.o monitor.o zaphistoryosd.o i18n.o setup-zaphistory.o \
++OBJS = $(PLUGIN).o zaplist.o monitor.o zaphistoryosd.o  setup-zaphistory.o \
+     epg_item.o statistic_item.o zaphistorychannel.o menu_reset.o zaphistory_osditem.o
+ 
+ ### Implicit rules:
+@@ -62,9 +62,34 @@
+ 
+ -include $(DEPFILE)
+ 
++### Internationalization (I18N):
++
++PODIR     = po
++LOCALEDIR = $(VDRDIR)/locale
++I18Npo    = $(wildcard $(PODIR)/*.po)
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Npot   = $(PODIR)/$(PLUGIN).pot
++
++%.mo: %.po
++	msgfmt -c -o $@ $<
++
++$(I18Npot): $(wildcard *.[ch] *.[ch]xx *.cc *.[ch]pp *.hh)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://qa.mandriva.com/>' -o $@ $^
++
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	@touch $@
++
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmsgs)
++
+ ### Targets:
+ 
+-all: libvdr-$(PLUGIN).so
++all: libvdr-$(PLUGIN).so i18n
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(OBJS) -o $@
+@@ -79,4 +104,5 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
++	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+Index: zaphistory-0.9.5/i18n.c
+===================================================================
+--- zaphistory-0.9.5/i18n.c
++++ zaphistory-0.9.5/i18n.c	2008-04-25 13:03:52.000000000 +0300
+@@ -1,616 +0,0 @@
+-#include <vdr/config.h>
+-
+-#include "i18n.h"
+-
+-/* Translations for the zaphistory plugin
+-
+-IMPORTANT: if you want to provide translation please contact me first
+-to get the most recent developer version of this file. Patches against
+-this file may produce conflicts with latest version.
+-
+-Contact: vdr@unterbrecher.de
+-
+-*/
+-
+-const tI18nPhrase Phrases[] = {
+-  { "Zapping history",	/*English*/
+-    "Letzte Kanäle",	/*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Historique des Zapping", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Histórico de Zapping", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Sirvimise ajalugu", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-  { "History of the last zapped channels",	/*English*/
+-    "Liste der zuletzt aktiven Kanäle",	/*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Historique des derniers changements de chaine", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Historial de los últimos canales vistos", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Viimati vaadatud kanalite ajalugu", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-  { "Zapping History",	/*English*/
+-    "Letzte Kanäle",	/*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Historique des Zapping", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Histórico de Zapping", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Sirvimise ajalugu", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-  { "Number of entries",	/*English*/
+-    "Anzahl der Einträge",	/*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Nombre d'entrées", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Número de entradas", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Nimekirja pikkus", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-  { "Hide mainmenu entry", /*English*/
+-    "Hauptmenüeintrag verstecken",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Cacher dans le menu principal", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Ocultar en el menú principal", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Peita peamenüü valikus", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-  { "Remove dublicate entries",	/*English*/
+-    "Doppelte Einträg entfernen",/*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Supprimer les entrées en doubles", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Borrar entradas duplicadas", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Topeltkirjete eemaldamine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Zap count", /*English*/
+-    "Wie oft Eingeschaltet",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Nombre de Zap", // TODO /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Contador de zapping", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Català*/
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Sirvimise hulk", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Button$Statistic", /*English*/
+-    "Statistik",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Statistique", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Estadísticas", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Statistika", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-
+-  { "Default view", /*English*/
+-    "Standard-Ansicht",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Vue par défaut", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Vista por defecto", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Vaikimisi vaade", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset counters?", /*English*/
+-    "Zähler zurücksetzen?",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remise à zéro des compteurs ?", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "¿Reiniciar contadores?", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Nullida loendurid?", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Delete complete history?", /*English*/
+-    "Gesamte History löschen?",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Supprimer l'historique complet ?", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "¿Borrar el histórico?", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Kustutata kogu ajalugu?", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-
+-  { "Default sort", /*English*/
+-    "Standard-Sortierung",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Ordre par défaut", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Orden por defecto", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Vaikimisi sorteerimine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "View time", /*English*/
+-    "Gesamtzeit",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Total", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Vista por tiempo", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Català*/
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Vaatamise kestus", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Button$Sort", /*English*/
+-    "Sortieren",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Ordre", // TODO /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Ordenar", // TODO /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Sorteerimine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Latest view", /*English*/
+-    "Zuletzt eingeschaltet",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Vu la dernière fois", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Vista últimos", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Viimati vaadatud", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Sorted by", /*English*/
+-    "Geordnet nach",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Trier par", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Ordenado por", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Sorteeritud:", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Delete all entries", /*English*/
+-    "Alle Einträge löschen",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Supprimer toutes les entrées", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Borrar todas las entradas", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Kõikide kirjete kustutamine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset all statistics", /*English*/
+-    "Reset der kompletten Statistik",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remettre à zéro toutes les statistiques", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Reiniciar todas las estadísticas", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Kogu statistika nullimine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Delete entry", /*English*/
+-    "Lösche Eintrag",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Supprimer l'entrée", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Borrar entrada", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Kirje kustutamine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset statistics for", /*English*/
+-    "Reset Statistik für",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remettre à zéro les statistiques pour", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Borrar estadística para", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Statistika nullimine kanalile", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset history", /*English*/
+-    "History zurücksetzen",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remise à zéro de l'historique", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "Borrar histórico", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Ajalugu nullimine", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset all?", /*English*/
+-    "Alle zurücksetzen?",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remettre tout à zéro ?", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "¿Borrar todo?", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Nullida kõik?", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-  { "Reset entry?", /*English*/
+-    "Eintrag zurücksetzen?",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Remise à zéro de l'entrée ?", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "¿Reiniciar entrada?", // /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Nullida kirje?", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-
+-  { "Delete entry?", /*English*/
+-    "Eintrag entfernen?",  /*Deutsch*/
+-    "", // TODO /*Slovenski*/
+-    "", // TODO /*Italiano*/
+-    "", // TODO /*Nederlands*
+-    "", // TODO /*Português*/
+-    "Supprimer l'entrée ?", /*Français*/
+-    "", // TODO /*Norsk*/
+-    "", /*suomi*/
+-    "", // TODO /*Polski*/
+-    "¿Borrar entrada?", //  /*Español*/
+-    "", // TODO /*Ellinika*/
+-    "", // TODO /*Svenska*/
+-    "", // TODO /*Romaneste*/
+-    "", // TODO /*Magyar*/
+-    "", // TODO /*Català*/
+-#if VDRVERSNUM > 10341
+-    "", // TODO /*Russian*/
+-    "", // TODO /*Hrvatski*/
+-    "Kustutada kirje?", /*Eesti*/
+-    "", // TODO /*Dansk*/
+-    "", // TODO /*Eesky*/
+-#endif
+-  },
+-
+-
+-  { NULL }
+-};
+Index: zaphistory-0.9.5/i18n.h
+===================================================================
+--- zaphistory-0.9.5/i18n.h
++++ zaphistory-0.9.5/i18n.h	2008-04-25 13:03:52.000000000 +0300
+@@ -1,24 +0,0 @@
+-/*
+- * See the README file for copyright information and how to reach the author.
+- */
+-
+- 
+-/*
+-
+-File	: i18n.c
+-Autor	: Peter Juszack
+-
+-Description
+------------------------------------------------------------------
+-Internationalisation file for zaphistory plugin
+-
+-*/
+-
+-#ifndef ___I18N_H
+-#define ___I18N_H
+-
+-#include <vdr/i18n.h>
+-
+-extern const tI18nPhrase Phrases[];
+-
+-#endif				//___I18N_H
+Index: zaphistory-0.9.5/setup-zaphistory.c
+===================================================================
+--- zaphistory-0.9.5/setup-zaphistory.c
++++ zaphistory-0.9.5/setup-zaphistory.c	2008-04-25 13:03:52.000000000 +0300
+@@ -7,7 +7,7 @@
+ 
+ #include "zaphistory.h"
+ #include "setup-zaphistory.h"
+-#include "i18n.h"
++
+ #ifdef __QNXNTO__
+ #include <strings.h>
+ #include <vdr/channels.h>
+Index: zaphistory-0.9.5/zaphistory.c
+===================================================================
+--- zaphistory-0.9.5/zaphistory.c
++++ zaphistory-0.9.5/zaphistory.c	2008-04-25 13:05:08.000000000 +0300
+@@ -9,11 +9,11 @@
+ #include "zaphistory.h"
+ #include "setup-zaphistory.h"
+ #include "zaphistoryosd.h"
+-#include "i18n.h"
++
+ 
+ static const char *VERSION = "0.9.5";
+-static const char *MAINMENUENTRY = "Zapping history";
+-static const char *DESCRIPTION = "History of the last zapped channels";
++static const char *MAINMENUENTRY = trNOOP("Zapping history");
++static const char *DESCRIPTION = trNOOP("History of the last zapped channels");
+ 
+ const char *cPluginZaphistory::Version(void) {
+     return VERSION;
+@@ -67,8 +67,6 @@
+   ZapHistory.Load( AddDirectory( ConfigDirectory(), "zaphistory.conf" ));
+     
+   monitor = new cZapHistoryMonitor();
+-  // Start any background activities the plugin shall perform.
+-  RegisterI18n( Phrases );
+   
+   return true;
+ }
+Index: zaphistory-0.9.5/po/de_DE.po
+===================================================================
+--- zaphistory-0.9.5/po/de_DE.po
++++ zaphistory-0.9.5/po/de_DE.po	2008-04-25 13:03:52.000000000 +0300
+@@ -0,0 +1,136 @@
++# VDR zaphistory plugin language source file.
++# Copyright (C) YEAR THE VDR-zaphistory'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-zaphistory package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-zaphistory\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 13:03+0300\n"
++"PO-Revision-Date: 2008-04-25 13:03+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: epg_item.c:72
++msgid ">>> no info! <<<"
++msgstr ""
++
++#: menu_reset.c:17
++msgid "Reset history"
++msgstr "History zurücksetzen"  
++
++#: menu_reset.c:29
++msgid "Delete all entries"
++msgstr "Alle Einträge löschen"  
++
++#: menu_reset.c:30
++msgid "Reset all statistics"
++msgstr "Reset der kompletten Statistik"  
++
++#: menu_reset.c:34
++msgid "Delete entry"
++msgstr "Lösche Eintrag"  
++
++#: menu_reset.c:38
++msgid "Reset statistics for"
++msgstr "Reset Statistik für"  
++
++#: menu_reset.c:44
++msgid "Button$Back"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Ok"
++msgstr ""
++
++#: menu_reset.c:62
++msgid "Delete complete history?"
++msgstr "Gesamte History löschen?"  
++
++#: menu_reset.c:68
++msgid "Reset all?"
++msgstr "Alle zurücksetzen?"  
++
++#: menu_reset.c:74
++msgid "Delete entry?"
++msgstr "Eintrag entfernen?"  
++
++#: menu_reset.c:80
++msgid "Reset entry?"
++msgstr "Eintrag zurücksetzen?"  
++
++#: setup-zaphistory.c:60 zaphistoryosd.c:59
++msgid "Latest view"
++msgstr "Zuletzt eingeschaltet"  
++
++#: setup-zaphistory.c:61 zaphistoryosd.c:60 zaphistoryosd.c:135
++msgid "Zap count"
++msgstr "Wie oft Eingeschaltet"  
++
++#: setup-zaphistory.c:62 zaphistoryosd.c:61 zaphistoryosd.c:135
++msgid "View time"
++msgstr "Gesamtzeit"  
++
++#: setup-zaphistory.c:65 zaphistoryosd.c:154
++msgid "Button$Schedule"
++msgstr ""
++
++#: setup-zaphistory.c:66 zaphistoryosd.c:123
++msgid "Button$Statistic"
++msgstr "Statistik"  
++
++#: setup-zaphistory.c:69
++msgid "Zaphistory"
++msgstr ""
++
++#: setup-zaphistory.c:70
++msgid "Number of entries"
++msgstr "Anzahl der Einträge" 
++
++#: setup-zaphistory.c:71
++msgid "Hide mainmenu entry"
++msgstr "Hauptmenüeintrag verstecken"  
++
++#: setup-zaphistory.c:72
++msgid "Default view"
++msgstr "Standard-Ansicht"  
++
++#: setup-zaphistory.c:73
++msgid "Default sort"
++msgstr "Standard-Sortierung"  
++
++#: zaphistory.c:15
++msgid "Zapping history"
++msgstr "Letzte Kanäle" 
++
++#: zaphistory.c:16
++msgid "History of the last zapped channels"
++msgstr "Liste der zuletzt aktiven Kanäle" 
++
++#: zaphistoryosd.c:22
++msgid "Zapping History"
++msgstr "Letzte Kanäle" 
++
++#: zaphistoryosd.c:64
++msgid "Sorted by"
++msgstr "Geordnet nach"  
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Info"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Reset"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Sort"
++msgstr "Sortieren"  
++
++#: zaphistoryosd.c:135
++msgid "Channel"
++msgstr ""
+Index: zaphistory-0.9.5/po/es_ES.po
+===================================================================
+--- zaphistory-0.9.5/po/es_ES.po
++++ zaphistory-0.9.5/po/es_ES.po	2008-04-25 13:03:52.000000000 +0300
+@@ -0,0 +1,136 @@
++# VDR zaphistory plugin language source file.
++# Copyright (C) YEAR THE VDR-zaphistory'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-zaphistory package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-zaphistory\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 13:03+0300\n"
++"PO-Revision-Date: 2008-04-25 13:03+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: epg_item.c:72
++msgid ">>> no info! <<<"
++msgstr ""
++
++#: menu_reset.c:17
++msgid "Reset history"
++msgstr "Borrar histórico"
++
++#: menu_reset.c:29
++msgid "Delete all entries"
++msgstr "Borrar todas las entradas"
++
++#: menu_reset.c:30
++msgid "Reset all statistics"
++msgstr "Reiniciar todas las estadísticas"
++
++#: menu_reset.c:34
++msgid "Delete entry"
++msgstr "Borrar entrada"
++
++#: menu_reset.c:38
++msgid "Reset statistics for"
++msgstr "Borrar estadística para"
++
++#: menu_reset.c:44
++msgid "Button$Back"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Ok"
++msgstr ""
++
++#: menu_reset.c:62
++msgid "Delete complete history?"
++msgstr "¿Borrar el histórico?"
++
++#: menu_reset.c:68
++msgid "Reset all?"
++msgstr "¿Borrar todo?"
++
++#: menu_reset.c:74
++msgid "Delete entry?"
++msgstr "¿Borrar entrada?"
++
++#: menu_reset.c:80
++msgid "Reset entry?"
++msgstr "¿Reiniciar entrada?"
++
++#: setup-zaphistory.c:60 zaphistoryosd.c:59
++msgid "Latest view"
++msgstr "Vista últimos"
++
++#: setup-zaphistory.c:61 zaphistoryosd.c:60 zaphistoryosd.c:135
++msgid "Zap count"
++msgstr "Contador de zapping"
++
++#: setup-zaphistory.c:62 zaphistoryosd.c:61 zaphistoryosd.c:135
++msgid "View time"
++msgstr "Vista por tiempo"
++
++#: setup-zaphistory.c:65 zaphistoryosd.c:154
++msgid "Button$Schedule"
++msgstr ""
++
++#: setup-zaphistory.c:66 zaphistoryosd.c:123
++msgid "Button$Statistic"
++msgstr "Estadísticas"
++
++#: setup-zaphistory.c:69
++msgid "Zaphistory"
++msgstr ""
++
++#: setup-zaphistory.c:70
++msgid "Number of entries"
++msgstr "Número de entradas"
++
++#: setup-zaphistory.c:71
++msgid "Hide mainmenu entry"
++msgstr "Ocultar en el menú principal"
++
++#: setup-zaphistory.c:72
++msgid "Default view"
++msgstr "Vista por defecto"
++
++#: setup-zaphistory.c:73
++msgid "Default sort"
++msgstr "Orden por defecto"
++
++#: zaphistory.c:15
++msgid "Zapping history"
++msgstr "Histórico de Zapping"
++
++#: zaphistory.c:16
++msgid "History of the last zapped channels"
++msgstr "Historial de los últimos canales vistos"
++
++#: zaphistoryosd.c:22
++msgid "Zapping History"
++msgstr "Histórico de Zapping"
++
++#: zaphistoryosd.c:64
++msgid "Sorted by"
++msgstr "Ordenado por"
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Info"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Reset"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Sort"
++msgstr "Ordenar"
++
++#: zaphistoryosd.c:135
++msgid "Channel"
++msgstr ""
+Index: zaphistory-0.9.5/po/et_EE.po
+===================================================================
+--- zaphistory-0.9.5/po/et_EE.po
++++ zaphistory-0.9.5/po/et_EE.po	2008-04-25 13:03:52.000000000 +0300
+@@ -0,0 +1,136 @@
++# VDR zaphistory plugin language source file.
++# Copyright (C) YEAR THE VDR-zaphistory'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-zaphistory package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-zaphistory\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 13:03+0300\n"
++"PO-Revision-Date: 2008-04-25 13:03+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-13\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: epg_item.c:72
++msgid ">>> no info! <<<"
++msgstr ""
++
++#: menu_reset.c:17
++msgid "Reset history"
++msgstr "Ajalugu nullimine" 
++
++#: menu_reset.c:29
++msgid "Delete all entries"
++msgstr "Kõikide kirjete kustutamine" 
++
++#: menu_reset.c:30
++msgid "Reset all statistics"
++msgstr "Kogu statistika nullimine" 
++
++#: menu_reset.c:34
++msgid "Delete entry"
++msgstr "Kirje kustutamine" 
++
++#: menu_reset.c:38
++msgid "Reset statistics for"
++msgstr "Statistika nullimine kanalile" 
++
++#: menu_reset.c:44
++msgid "Button$Back"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Ok"
++msgstr ""
++
++#: menu_reset.c:62
++msgid "Delete complete history?"
++msgstr "Kustutata kogu ajalugu?" 
++
++#: menu_reset.c:68
++msgid "Reset all?"
++msgstr "Nullida kõik?" 
++
++#: menu_reset.c:74
++msgid "Delete entry?"
++msgstr "Kustutada kirje?" 
++
++#: menu_reset.c:80
++msgid "Reset entry?"
++msgstr "Nullida kirje?" 
++
++#: setup-zaphistory.c:60 zaphistoryosd.c:59
++msgid "Latest view"
++msgstr "Viimati vaadatud" 
++
++#: setup-zaphistory.c:61 zaphistoryosd.c:60 zaphistoryosd.c:135
++msgid "Zap count"
++msgstr "Sirvimise hulk" 
++
++#: setup-zaphistory.c:62 zaphistoryosd.c:61 zaphistoryosd.c:135
++msgid "View time"
++msgstr "Vaatamise kestus" 
++
++#: setup-zaphistory.c:65 zaphistoryosd.c:154
++msgid "Button$Schedule"
++msgstr ""
++
++#: setup-zaphistory.c:66 zaphistoryosd.c:123
++msgid "Button$Statistic"
++msgstr "Statistika" 
++
++#: setup-zaphistory.c:69
++msgid "Zaphistory"
++msgstr ""
++
++#: setup-zaphistory.c:70
++msgid "Number of entries"
++msgstr "Nimekirja pikkus" 
++
++#: setup-zaphistory.c:71
++msgid "Hide mainmenu entry"
++msgstr "Peita peamenüü valikus" 
++
++#: setup-zaphistory.c:72
++msgid "Default view"
++msgstr "Vaikimisi vaade" 
++
++#: setup-zaphistory.c:73
++msgid "Default sort"
++msgstr "Vaikimisi sorteerimine" 
++
++#: zaphistory.c:15
++msgid "Zapping history"
++msgstr "Sirvimise ajalugu" 
++
++#: zaphistory.c:16
++msgid "History of the last zapped channels"
++msgstr "Viimati vaadatud kanalite ajalugu" 
++
++#: zaphistoryosd.c:22
++msgid "Zapping History"
++msgstr "Sirvimise ajalugu" 
++
++#: zaphistoryosd.c:64
++msgid "Sorted by"
++msgstr "Sorteeritud:" 
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Info"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Reset"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Sort"
++msgstr "Sorteerimine" 
++
++#: zaphistoryosd.c:135
++msgid "Channel"
++msgstr ""
+Index: zaphistory-0.9.5/po/fr_FR.po
+===================================================================
+--- zaphistory-0.9.5/po/fr_FR.po
++++ zaphistory-0.9.5/po/fr_FR.po	2008-04-25 13:03:52.000000000 +0300
+@@ -0,0 +1,136 @@
++# VDR zaphistory plugin language source file.
++# Copyright (C) YEAR THE VDR-zaphistory'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-zaphistory package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-zaphistory\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 13:03+0300\n"
++"PO-Revision-Date: 2008-04-25 13:03+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: epg_item.c:72
++msgid ">>> no info! <<<"
++msgstr ""
++
++#: menu_reset.c:17
++msgid "Reset history"
++msgstr "Remise à zéro de l'historique" 
++
++#: menu_reset.c:29
++msgid "Delete all entries"
++msgstr "Supprimer toutes les entrées" 
++
++#: menu_reset.c:30
++msgid "Reset all statistics"
++msgstr "Remettre à zéro toutes les statistiques" 
++
++#: menu_reset.c:34
++msgid "Delete entry"
++msgstr "Supprimer l'entrée" 
++
++#: menu_reset.c:38
++msgid "Reset statistics for"
++msgstr "Remettre à zéro les statistiques pour" 
++
++#: menu_reset.c:44
++msgid "Button$Back"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Ok"
++msgstr ""
++
++#: menu_reset.c:62
++msgid "Delete complete history?"
++msgstr "Supprimer l'historique complet ?" 
++
++#: menu_reset.c:68
++msgid "Reset all?"
++msgstr "Remettre tout à zéro ?" 
++
++#: menu_reset.c:74
++msgid "Delete entry?"
++msgstr "Supprimer l'entrée ?" 
++
++#: menu_reset.c:80
++msgid "Reset entry?"
++msgstr "Remise à zéro de l'entrée ?" 
++
++#: setup-zaphistory.c:60 zaphistoryosd.c:59
++msgid "Latest view"
++msgstr "Vu la dernière fois" 
++
++#: setup-zaphistory.c:61 zaphistoryosd.c:60 zaphistoryosd.c:135
++msgid "Zap count"
++msgstr "Nombre de Zap"
++
++#: setup-zaphistory.c:62 zaphistoryosd.c:61 zaphistoryosd.c:135
++msgid "View time"
++msgstr "Total" 
++
++#: setup-zaphistory.c:65 zaphistoryosd.c:154
++msgid "Button$Schedule"
++msgstr ""
++
++#: setup-zaphistory.c:66 zaphistoryosd.c:123
++msgid "Button$Statistic"
++msgstr "Statistique" 
++
++#: setup-zaphistory.c:69
++msgid "Zaphistory"
++msgstr ""
++
++#: setup-zaphistory.c:70
++msgid "Number of entries"
++msgstr "Nombre d'entrées" 
++
++#: setup-zaphistory.c:71
++msgid "Hide mainmenu entry"
++msgstr "Cacher dans le menu principal" 
++
++#: setup-zaphistory.c:72
++msgid "Default view"
++msgstr "Vue par défaut" 
++
++#: setup-zaphistory.c:73
++msgid "Default sort"
++msgstr "Ordre par défaut" 
++
++#: zaphistory.c:15
++msgid "Zapping history"
++msgstr "Historique des Zapping" 
++
++#: zaphistory.c:16
++msgid "History of the last zapped channels"
++msgstr "Historique des derniers changements de chaine" 
++
++#: zaphistoryosd.c:22
++msgid "Zapping History"
++msgstr "Historique des Zapping" 
++
++#: zaphistoryosd.c:64
++msgid "Sorted by"
++msgstr "Trier par" 
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Info"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Reset"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Sort"
++msgstr "Ordre"
++
++#: zaphistoryosd.c:135
++msgid "Channel"
++msgstr ""
+Index: zaphistory-0.9.5/po/zaphistory.pot
+===================================================================
+--- zaphistory-0.9.5/po/zaphistory.pot
++++ zaphistory-0.9.5/po/zaphistory.pot	2008-04-25 13:03:52.000000000 +0300
+@@ -0,0 +1,137 @@
++# SOME DESCRIPTIVE TITLE.
++# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the PACKAGE package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++#, fuzzy
++msgid ""
++msgstr ""
++"Project-Id-Version: PACKAGE VERSION\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 13:03+0300\n"
++"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: LANGUAGE <LL@li.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=CHARSET\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: epg_item.c:72
++msgid ">>> no info! <<<"
++msgstr ""
++
++#: menu_reset.c:17
++msgid "Reset history"
++msgstr ""
++
++#: menu_reset.c:29
++msgid "Delete all entries"
++msgstr ""
++
++#: menu_reset.c:30
++msgid "Reset all statistics"
++msgstr ""
++
++#: menu_reset.c:34
++msgid "Delete entry"
++msgstr ""
++
++#: menu_reset.c:38
++msgid "Reset statistics for"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Back"
++msgstr ""
++
++#: menu_reset.c:44
++msgid "Button$Ok"
++msgstr ""
++
++#: menu_reset.c:62
++msgid "Delete complete history?"
++msgstr ""
++
++#: menu_reset.c:68
++msgid "Reset all?"
++msgstr ""
++
++#: menu_reset.c:74
++msgid "Delete entry?"
++msgstr ""
++
++#: menu_reset.c:80
++msgid "Reset entry?"
++msgstr ""
++
++#: setup-zaphistory.c:60 zaphistoryosd.c:59
++msgid "Latest view"
++msgstr ""
++
++#: setup-zaphistory.c:61 zaphistoryosd.c:60 zaphistoryosd.c:135
++msgid "Zap count"
++msgstr ""
++
++#: setup-zaphistory.c:62 zaphistoryosd.c:61 zaphistoryosd.c:135
++msgid "View time"
++msgstr ""
++
++#: setup-zaphistory.c:65 zaphistoryosd.c:154
++msgid "Button$Schedule"
++msgstr ""
++
++#: setup-zaphistory.c:66 zaphistoryosd.c:123
++msgid "Button$Statistic"
++msgstr ""
++
++#: setup-zaphistory.c:69
++msgid "Zaphistory"
++msgstr ""
++
++#: setup-zaphistory.c:70
++msgid "Number of entries"
++msgstr ""
++
++#: setup-zaphistory.c:71
++msgid "Hide mainmenu entry"
++msgstr ""
++
++#: setup-zaphistory.c:72
++msgid "Default view"
++msgstr ""
++
++#: setup-zaphistory.c:73
++msgid "Default sort"
++msgstr ""
++
++#: zaphistory.c:15
++msgid "Zapping history"
++msgstr ""
++
++#: zaphistory.c:16
++msgid "History of the last zapped channels"
++msgstr ""
++
++#: zaphistoryosd.c:22
++msgid "Zapping History"
++msgstr ""
++
++#: zaphistoryosd.c:64
++msgid "Sorted by"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Info"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Reset"
++msgstr ""
++
++#: zaphistoryosd.c:123 zaphistoryosd.c:154
++msgid "Button$Sort"
++msgstr ""
++
++#: zaphistoryosd.c:135
++msgid "Channel"
++msgstr ""
