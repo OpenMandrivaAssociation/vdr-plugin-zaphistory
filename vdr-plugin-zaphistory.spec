@@ -10,7 +10,7 @@ Version:	%version
 Release:	%mkrel %rel
 Group:		Video
 License:	GPL
-URL:		http://www.unterbrecher.de/vdr/developer.php
+URL:		https://www.unterbrecher.de/vdr/developer.php
 Source:		http://www.unterbrecher.de/vdr/download/vdr-%plugin-%version.tar.bz2
 Patch0:		zaphistory-0.9.5-i18n-1.6.patch
 BuildRequires:	vdr-devel >= 1.6.0
