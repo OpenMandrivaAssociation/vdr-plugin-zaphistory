@@ -7,7 +7,7 @@
 Summary:	VDR plugin: History of the last zapped channels
 Name:		%name
 Version:	%version
-Release:	%mkrel %rel
+Release:	%rel.1
 Group:		Video
 License:	GPL
 URL:		https://www.unterbrecher.de/vdr/developer.php
